@@ -79,6 +79,14 @@ public class Library {
         return loan;
     }
 
+    public BigDecimal calculateFine(String itemId, LocalDate date) {
+        return findActiveLoan(itemId).calculateFine(date);
+    }
+
+    public void payFine(String patronId, BigDecimal amount) {
+        findPatron(patronId).payFine(amount);
+    }
+
     private Patron findPatron(String patronId) {
         return patronRepository.findById(patronId)
                 .orElseThrow(() -> new PatronNotFoundException("Patron " + patronId + " not found"));

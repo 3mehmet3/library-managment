@@ -9,6 +9,7 @@ import com.library.exception.BorrowLimitExceededException;
 import com.library.exception.DuplicateItemException;
 import com.library.exception.DuplicatePatronException;
 import com.library.exception.InvalidDateException;
+import com.library.exception.InvalidPaymentException;
 import com.library.exception.ItemNotAvailableException;
 import com.library.exception.ItemNotBorrowedException;
 import com.library.exception.ItemNotFoundException;
@@ -238,6 +239,110 @@ class LibraryTest {
 
         assertThrows(InvalidDateException.class, () -> library.returnItem("b1", BORROW_DATE.minusDays(1)));
         assertFalse(loan.isReturned());
+    }
+
+    @Test
+    void calculateFine_beforeDueDate_returnsZero() {
+        registerStudent();
+        addBook("b1");
+        library.borrow("p1", "b1", BORROW_DATE);
+
+        assertEquals(0, library.calculateFine("b1", BORROW_DATE.plusDays(21)).signum());
+    }
+
+    @Test
+    void calculateFine_studentFourDaysLate_returnsFour() {
+        registerStudent();
+        addBook("b1");
+        library.borrow("p1", "b1", BORROW_DATE);
+
+        assertEquals(new BigDecimal("4.00"), library.calculateFine("b1", BORROW_DATE.plusDays(25)));
+    }
+
+    @Test
+    void calculateFine_facultyFourDaysLate_returnsTwo() {
+        library.registerPatron(new Patron("p2", "Ayse", new FacultyPolicy()));
+        addBook("b1");
+        library.borrow("p2", "b1", BORROW_DATE);
+
+        assertEquals(new BigDecimal("2.00"), library.calculateFine("b1", BORROW_DATE.plusDays(25)));
+    }
+
+    @Test
+    void calculateFine_activeLoan_doesNotChangePatronBalance() {
+        Patron student = registerStudent();
+        addBook("b1");
+        library.borrow("p1", "b1", BORROW_DATE);
+
+        library.calculateFine("b1", BORROW_DATE.plusDays(25));
+
+        assertFalse(student.hasOutstandingFine());
+    }
+
+    @Test
+    void calculateFine_unknownItem_throwsItemNotFoundException() {
+        assertThrows(ItemNotFoundException.class, () -> library.calculateFine("missing", BORROW_DATE));
+    }
+
+    @Test
+    void calculateFine_itemNotBorrowed_throwsItemNotBorrowedException() {
+        addBook("b1");
+
+        assertThrows(ItemNotBorrowedException.class, () -> library.calculateFine("b1", BORROW_DATE));
+    }
+
+    @Test
+    void calculateFine_dateBeforeBorrowDate_throwsInvalidDateException() {
+        registerStudent();
+        addBook("b1");
+        library.borrow("p1", "b1", BORROW_DATE);
+
+        assertThrows(InvalidDateException.class, () -> library.calculateFine("b1", BORROW_DATE.minusDays(1)));
+    }
+
+    @Test
+    void payFine_fullAmount_allowsBorrowingAgain() {
+        Patron student = registerStudent();
+        addBook("b1");
+        library.borrow("p1", "b1", BORROW_DATE);
+        library.returnItem("b1", BORROW_DATE.plusDays(24));
+
+        library.payFine("p1", new BigDecimal("3.00"));
+
+        assertFalse(student.hasOutstandingFine());
+        assertTrue(library.borrow("p1", "b1", BORROW_DATE.plusDays(24)).getReturnDate().isEmpty());
+    }
+
+    @Test
+    void payFine_partialAmount_keepsRemainingBalance() {
+        Patron student = registerStudent();
+        student.addFine(new BigDecimal("3.00"));
+
+        library.payFine("p1", new BigDecimal("1.00"));
+
+        assertEquals(new BigDecimal("2.00"), student.getFineBalance());
+    }
+
+    @Test
+    void payFine_unknownPatron_throwsPatronNotFoundException() {
+        assertThrows(PatronNotFoundException.class, () -> library.payFine("missing", new BigDecimal("1.00")));
+    }
+
+    @Test
+    void payFine_amountGreaterThanBalance_throwsInvalidPaymentException() {
+        Patron student = registerStudent();
+        student.addFine(new BigDecimal("3.00"));
+
+        assertThrows(InvalidPaymentException.class, () -> library.payFine("p1", new BigDecimal("3.50")));
+        assertEquals(new BigDecimal("3.00"), student.getFineBalance());
+    }
+
+    @Test
+    void payFine_zeroAmount_throwsInvalidPaymentException() {
+        Patron student = registerStudent();
+        student.addFine(new BigDecimal("3.00"));
+
+        assertThrows(InvalidPaymentException.class, () -> library.payFine("p1", BigDecimal.ZERO));
     }
 
     private Patron registerStudent() {
