@@ -11,8 +11,18 @@ Graded on design patterns (Strategy, Factory, Facade, Repository/DI), SOLID, cus
 - No extra dependencies (no Mockito, no Lombok). Tests use the in-memory repositories.
 - No unnecessary comments.
 - Test names follow `method_condition_expectedResult`.
+- Every public method (except trivial getters/setters) has at least one success and one failure test.
+- Every custom exception is thrown by at least one test (`assertThrows`).
+- One behavior per test.
+- Test classes mirror the main package structure.
 - Run `mvn test` after each step; all tests must pass.
 - Commit after each step, never push.
+
+## Domain rules
+- Loan periods: Book 21, Dvd 7, Magazine 3 days.
+- StudentPolicy: limit 3, daily fine 1.00. FacultyPolicy: limit 10, daily fine 0.50.
+- On return, any overdue fine is added to the patron's fine balance.
+- A patron with an unpaid fine balance cannot borrow.
 
 ## Packages (`com.library`)
 - `exception`: `LibraryException` and its 10 subclasses
