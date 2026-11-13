@@ -59,6 +59,11 @@ class PatronTest {
     }
 
     @Test
+    void addFine_nullAmount_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> patron.addFine(null));
+    }
+
+    @Test
     void payFine_partialAmount_decreasesBalance() {
         patron.addFine(new BigDecimal("5.00"));
 

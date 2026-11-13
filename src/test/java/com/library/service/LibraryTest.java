@@ -182,6 +182,42 @@ class LibraryTest {
     }
 
     @Test
+    void borrow_facultyBeyondStudentLimit_succeeds() {
+        library.registerPatron(new Patron("p2", "Ayse", new FacultyPolicy()));
+        for (String id : List.of("b1", "b2", "b3", "b4")) {
+            addBook(id);
+            library.borrow("p2", id, BORROW_DATE);
+        }
+
+        assertEquals(4, loanRepository.countActiveByPatronId("p2"));
+    }
+
+    @Test
+    void borrow_unknownPatronAndUnknownItem_throwsPatronNotFoundException() {
+        assertThrows(PatronNotFoundException.class, () -> library.borrow("missing", "missing", BORROW_DATE));
+    }
+
+    @Test
+    void borrow_outstandingFineAndItemAlreadyBorrowed_throwsOutstandingFineException() {
+        Patron student = registerStudent();
+        library.registerPatron(new Patron("p2", "Ayse", new FacultyPolicy()));
+        addBook("b1");
+        library.borrow("p2", "b1", BORROW_DATE);
+        student.addFine(new BigDecimal("1.00"));
+
+        assertThrows(OutstandingFineException.class, () -> library.borrow("p1", "b1", BORROW_DATE));
+    }
+
+    @Test
+    void borrow_nullDate_throwsIllegalArgumentException() {
+        registerStudent();
+        addBook("b1");
+
+        assertThrows(IllegalArgumentException.class, () -> library.borrow("p1", "b1", null));
+        assertEquals(Optional.empty(), loanRepository.findActiveByItemId("b1"));
+    }
+
+    @Test
     void returnItem_onTime_marksLoanReturnedWithoutFine() {
         Patron student = registerStudent();
         addBook("b1");

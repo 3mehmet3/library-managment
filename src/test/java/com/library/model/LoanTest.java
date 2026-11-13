@@ -52,6 +52,33 @@ class LoanTest {
     }
 
     @Test
+    void constructor_nullItem_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> new Loan(null, student, BORROW_DATE));
+    }
+
+    @Test
+    void constructor_nullPatron_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> new Loan(book, null, BORROW_DATE));
+    }
+
+    @Test
+    void markReturned_nullDate_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> loan.markReturned(null));
+    }
+
+    @Test
+    void calculateFine_nullDate_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> loan.calculateFine(null));
+    }
+
+    @Test
+    void calculateFine_magazineOneDayLate_returnsOne() {
+        Loan magazineLoan = new Loan(new Magazine("m1", "Wired"), student, BORROW_DATE);
+
+        assertEquals(new BigDecimal("1.00"), magazineLoan.calculateFine(BORROW_DATE.plusDays(4)));
+    }
+
+    @Test
     void getReturnDate_notReturned_returnsEmpty() {
         assertEquals(Optional.empty(), loan.getReturnDate());
         assertFalse(loan.isReturned());
