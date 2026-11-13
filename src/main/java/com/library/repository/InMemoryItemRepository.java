@@ -11,6 +11,9 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public void save(LibraryItem item) {
+        if (item == null) {
+            throw new IllegalArgumentException("Item must not be null");
+        }
         items.put(item.getId(), item);
     }
 

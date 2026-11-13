@@ -2,6 +2,7 @@ package com.library.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.library.model.Patron;
@@ -36,5 +37,10 @@ class InMemoryPatronRepositoryTest {
     @Test
     void existsById_unknownId_returnsFalse() {
         assertFalse(repository.existsById("missing"));
+    }
+
+    @Test
+    void save_nullPatron_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> repository.save(null));
     }
 }

@@ -11,6 +11,9 @@ public class InMemoryPatronRepository implements PatronRepository {
 
     @Override
     public void save(Patron patron) {
+        if (patron == null) {
+            throw new IllegalArgumentException("Patron must not be null");
+        }
         patrons.put(patron.getId(), patron);
     }
 

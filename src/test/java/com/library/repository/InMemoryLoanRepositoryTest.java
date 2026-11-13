@@ -1,6 +1,7 @@
 package com.library.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.library.model.Book;
 import com.library.model.Dvd;
@@ -71,5 +72,10 @@ class InMemoryLoanRepositoryTest {
         repository.save(new Loan(new Book("b1", "Clean Code"), other, BORROW_DATE));
 
         assertEquals(0, repository.countActiveByPatronId("p1"));
+    }
+
+    @Test
+    void save_nullLoan_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> repository.save(null));
     }
 }

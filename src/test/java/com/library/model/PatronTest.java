@@ -21,10 +21,14 @@ class PatronTest {
     }
 
     @Test
-    void constructor_validArguments_startsWithZeroBalance() {
+    void constructor_validArguments_storesIdNameAndPolicy() {
         assertEquals("p1", patron.getId());
         assertEquals("Ali", patron.getName());
         assertEquals(3, patron.getPolicy().getBorrowLimit());
+    }
+
+    @Test
+    void constructor_validArguments_startsWithZeroBalance() {
         assertEquals(BigDecimal.ZERO, patron.getFineBalance());
         assertFalse(patron.hasOutstandingFine());
     }

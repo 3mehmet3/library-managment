@@ -11,6 +11,9 @@ public class InMemoryLoanRepository implements LoanRepository {
 
     @Override
     public void save(Loan loan) {
+        if (loan == null) {
+            throw new IllegalArgumentException("Loan must not be null");
+        }
         loans.add(loan);
     }
 

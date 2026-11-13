@@ -81,6 +81,10 @@ class LoanTest {
     @Test
     void getReturnDate_notReturned_returnsEmpty() {
         assertEquals(Optional.empty(), loan.getReturnDate());
+    }
+
+    @Test
+    void isReturned_notReturned_returnsFalse() {
         assertFalse(loan.isReturned());
     }
 

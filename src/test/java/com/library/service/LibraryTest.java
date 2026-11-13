@@ -218,8 +218,8 @@ class LibraryTest {
     }
 
     @Test
-    void returnItem_onTime_marksLoanReturnedWithoutFine() {
-        Patron student = registerStudent();
+    void returnItem_onTime_marksLoanReturned() {
+        registerStudent();
         addBook("b1");
         library.borrow("p1", "b1", BORROW_DATE);
 
@@ -227,8 +227,18 @@ class LibraryTest {
 
         assertTrue(loan.isReturned());
         assertEquals(Optional.of(BORROW_DATE.plusDays(21)), loan.getReturnDate());
-        assertFalse(student.hasOutstandingFine());
         assertEquals(Optional.empty(), loanRepository.findActiveByItemId("b1"));
+    }
+
+    @Test
+    void returnItem_onTime_addsNoFine() {
+        Patron student = registerStudent();
+        addBook("b1");
+        library.borrow("p1", "b1", BORROW_DATE);
+
+        library.returnItem("b1", BORROW_DATE.plusDays(21));
+
+        assertFalse(student.hasOutstandingFine());
     }
 
     @Test
@@ -337,15 +347,24 @@ class LibraryTest {
     }
 
     @Test
-    void payFine_fullAmount_allowsBorrowingAgain() {
+    void payFine_fullAmount_clearsFineBalance() {
         Patron student = registerStudent();
+        student.addFine(new BigDecimal("3.00"));
+
+        library.payFine("p1", new BigDecimal("3.00"));
+
+        assertFalse(student.hasOutstandingFine());
+    }
+
+    @Test
+    void payFine_fullAmount_allowsBorrowingAgain() {
+        registerStudent();
         addBook("b1");
         library.borrow("p1", "b1", BORROW_DATE);
         library.returnItem("b1", BORROW_DATE.plusDays(24));
 
         library.payFine("p1", new BigDecimal("3.00"));
 
-        assertFalse(student.hasOutstandingFine());
         assertTrue(library.borrow("p1", "b1", BORROW_DATE.plusDays(24)).getReturnDate().isEmpty());
     }
 
