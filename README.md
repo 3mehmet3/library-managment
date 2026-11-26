@@ -25,3 +25,21 @@ library.returnItem("b1", loan.getDueDate());
 ```
 
 Import classes from com.library.model, policy, repository and service, plus java.time.LocalDate. calculateFine previews an active loan's fine; payFine settles it.
+
+## Class diagram
+
+```mermaid
+classDiagram
+        Library --> ItemRepository
+        Library --> PatronRepository
+        Library --> LoanRepository
+        Library --> Loan
+        Loan --> LibraryItem
+        Loan --> Patron
+        Patron --> PatronPolicy
+        LibraryItem <|-- Book
+        LibraryItem <|-- Dvd
+        LibraryItem <|-- Magazine
+        PatronPolicy <|.. StudentPolicy
+    PatronPolicy <|.. FacultyPolicy
+```
