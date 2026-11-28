@@ -3,27 +3,23 @@ package com.library.policy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.Arguments;
+import java.util.stream.Stream;
 
 class PatronPolicyTest {
 
-    @Test
-    void getBorrowLimit_student_returns3() {
-        assertEquals(3, new StudentPolicy().getBorrowLimit());
+    @ParameterizedTest
+    @MethodSource("policies")
+    void policy_hasExpectedLimitAndFine(PatronPolicy policy, int limit, BigDecimal fine) {
+        assertEquals(limit, policy.getBorrowLimit());
+        assertEquals(fine, policy.getDailyFine());
     }
 
-    @Test
-    void getDailyFine_student_returnsOne() {
-        assertEquals(new BigDecimal("1.00"), new StudentPolicy().getDailyFine());
-    }
-
-    @Test
-    void getBorrowLimit_faculty_returns10() {
-        assertEquals(10, new FacultyPolicy().getBorrowLimit());
-    }
-
-    @Test
-    void getDailyFine_faculty_returnsHalf() {
-        assertEquals(new BigDecimal("0.50"), new FacultyPolicy().getDailyFine());
+    static Stream<Arguments> policies() {
+        return Stream.of(
+                Arguments.of(new StudentPolicy(), 3, new BigDecimal("1.00")),
+                Arguments.of(new FacultyPolicy(), 10, new BigDecimal("0.50")));
     }
 }
